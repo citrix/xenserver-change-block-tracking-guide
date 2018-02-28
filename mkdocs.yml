@@ -1,0 +1,20 @@
+site_name: Citrix XenServer Changed Block Tracking Guide
+site_description: Citrix XenServer Changed Block Tracking Guide
+theme_dir: citrix-sdk
+markdown_extensions:
+  - admonition
+  - codehilite(guess_lang=false)
+  - toc(permalink=true)
+  - footnotes
+  - meta
+
+pages:
+- Introduction: index.md
+- Getting Started: getting-started.md
+- Enabling NBD connection: enabling-nbd.md
+- Using CBT with a VDI: using-with-vdi.md
+- Deleting VDI snapshots: deleting-snapshot.md
+- Getting the list of changes blocks in a VDI: list-changed-blocks.md
+- Exporting changed blocks over NBD: exporting-changed-blocks.md
+- Coalescing changed blocks onto a base VDI: coalescing-blocks.md
+- Appendices: appendices.md
