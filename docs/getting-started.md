@@ -55,33 +55,29 @@ To set up changed block tracking for a VDI, complete the following steps
 1.  Use the Management API to establish a XenAPI session on the
     XenServer host:
 
-    ```python
-    import XenAPI
-    import shutil
-    import urllib3
-    import requests
+        import XenAPI
+        import shutil
+        import urllib3
+        import requests
 
-    session = XenAPI.xapi_local()
-    session.xenapi.login_with_password("<user>", "<password>", "<version>", "<originator>")
-    ```
+        session = XenAPI.xapi_local()
+        session.xenapi.login_with_password("<user>", "<password>", "<version>", "<originator>")
 
 1.  **Optional**: If you intend to create a new VM and new VDIs to restore your backed up data to, you must also export your VM metadata.
     Ensure that you export a copy of the VM metadata any time your VM properties change.
     This can be done by using HTTPS or by using the command line.
 
-    ```python
-    session_id = session._session
-    url = ("https://%s/export_metadata?session_id=%s&uuid=%s"
-            "&export_snapshots=false"
-            % (<xs_host>, session_id, <vm_uuid>))
+        session_id = session._session
+        url = ("https://%s/export_metadata?session_id=%s&uuid=%s"
+                "&export_snapshots=false"
+                % (<xs_host>, session_id, <vm_uuid>))
 
-    with requests.Session() as session:
-        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-        request = session.get(url, verify=False, stream=True)
-        with open(<export_path>, 'wb') as filehandle:
-            shutil.copyfileobj(request.raw, filehandle)
-        request.raise_for_status()
-    ```
+        with requests.Session() as session:
+            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+            request = session.get(url, verify=False, stream=True)
+            with open(<export_path>, 'wb') as filehandle:
+                shutil.copyfileobj(request.raw, filehandle)
+            request.raise_for_status()
 
     Where &lt;*export\_path*&gt; is the location to save the VM metadata to.
 
@@ -93,23 +89,17 @@ To set up changed block tracking for a VDI, complete the following steps
 
 1.  Get a reference for the VDI you want to snapshot:
 
-    ```python
-    vdi_ref = session.xenapi.VDI.get_by_uuid("<vdi_uuid>")
-    ```
+        vdi_ref = session.xenapi.VDI.get_by_uuid("<vdi_uuid>")
 
 1.  Enable changed block tracking for the VDI:
 
-    ```python
-    session.xenapi.VDI.enable_cbt(<vdi_ref>)
-    ```
+        session.xenapi.VDI.enable_cbt(<vdi_ref>)
 
     For more information, see [Using changed block tracking with a virtual disk image](./using-with-vdi.md).
 
 1.  Take a snapshot of the VDI:
 
-    ```python
-    base_snapshot_vdi_ref = session.xenapi.VDI.snapshot(<vdi_ref>)
-    ```
+        base_snapshot_vdi_ref = session.xenapi.VDI.snapshot(<vdi_ref>)
 
     This VDI snapshot is the base snapshot.
 
@@ -117,31 +107,25 @@ To set up changed block tracking for a VDI, complete the following steps
 
     For example, at the xe command line run:
 
-    ```python
-    xe vdi-export uuid=<base-snapshot-vdi-uuid> filename=<name of export>
-    ```
+        xe vdi-export uuid=<base-snapshot-vdi-uuid> filename=<name of export>
 
     Or, in Python, you can use the following code:
 
-    ```python
-    session_id = session._session
-    url = ('https://%s/export_raw_vdi?session_id=%s&vdi=%s&format=raw'
-           % (<xs_host>, session_id, <base_snapshot_vdi_uuid>))
-    with requests.Session() as http_session:
-        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-        request = http_session.get(url, verify=False, stream=True)
-        with open(<export_path>, 'wb') as filehandle:
-            shutil.copyfileobj(request.raw, filehandle)
-        request.raise_for_status()
-    ```
+        session_id = session._session
+        url = ('https://%s/export_raw_vdi?session_id=%s&vdi=%s&format=raw'
+               % (<xs_host>, session_id, <base_snapshot_vdi_uuid>))
+        with requests.Session() as http_session:
+            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+            request = http_session.get(url, verify=False, stream=True)
+            with open(<export_path>, 'wb') as filehandle:
+                shutil.copyfileobj(request.raw, filehandle)
+            request.raise_for_status()
 
     Where &lt;*export\_path*&gt; is the location you want to write the exported VDI to.
 
 1.  Optional: For each VDI snapshot, delete the snapshot data, but retain the metadata:
 
-    ```python
-    session.xenapi.VDI.data_destroy(<base_snapshot_vdi_ref>)
-    ```
+        session.xenapi.VDI.data_destroy(<base_snapshot_vdi_ref>)
 
     This frees up space on the host or SR.
 
@@ -156,9 +140,7 @@ To take an incremental backup, complete the following steps:
 
 1.  Check that changed block tracking is enabled:
 
-    ```python
-    is_cbt_enabled = session.xenapi.VDI.get_cbt_enabled(<vdi_ref>)
-    ```
+        is_cbt_enabled = session.xenapi.VDI.get_cbt_enabled(<vdi_ref>)
 
     If the value of `is_cbt_enabled` is not `true`, you must complete the steps in the *Setting up changed block tracking* section, before taking incremental backups.
     For more information, see [Incremental backup sets](./using-with-vdi.md).
@@ -167,24 +149,18 @@ To take an incremental backup, complete the following steps:
 
 1.  Take a snapshot of the VDI:
 
-    ```python
-    snapshot_vdi_ref = session.xenapi.VDI.snapshot(<vdi_ref>)
-    ```
+        snapshot_vdi_ref = session.xenapi.VDI.snapshot(<vdi_ref>)
 
 1.  Compare this snapshot to a previous snapshot to find the changed blocks:
 
-    ```python
-    bitmap = session.xenapi.VDI.list_changed_blocks(<base_snapshot_vdi_ref>, <snapshot_vdi_ref>)
-    ```
+        bitmap = session.xenapi.VDI.list_changed_blocks(<base_snapshot_vdi_ref>, <snapshot_vdi_ref>)
 
     This call returns a base64-encoded bitmap that indicates which blocks have changed.
     For more information, see [Get the list of blocks that changed between VDIs](./list-changed-blocks.md).
 
 1.  Get details for a list of connections that can be used to use to access the VDI snapshot over the NBD protocol.
 
-    ```python
-    connections = session.xenapi.VDI.get_nbd_info(<snapshot_vdi_ref>)
-    ```
+        connections = session.xenapi.VDI.get_nbd_info(<snapshot_vdi_ref>)
 
     This call returns a list of connection details that are specific to this session.
     Each set of connection details in the list contains a dictionary of the parameters required for an NBD client connection.
@@ -199,10 +175,7 @@ To take an incremental backup, complete the following steps:
 
     1.  Connect to the NBD server.
 
-        ```python
-        nbd-client <address> <port> -N <exportname> -cacertfile <cacert>
-              -tlshostname <subject>
-        ```
+            nbd-client <address> <port> -N <exportname> -cacertfile <cacert> -tlshostname <subject>
 
         -  The &lt;*address*&gt;, &lt;*port*&gt;, &lt;*exportname*&gt;, and &lt;*subject*&gt; values passed as parameters to the connection command are the values returned by the `get_nbd_info` call.
 
@@ -216,9 +189,7 @@ To take an incremental backup, complete the following steps:
 
     1.  Disconnect from the block device:
 
-        ```python
-        nbd-client -d <block_device>
-        ```
+            nbd-client -d <block_device>
 
     1.  Optional: We recommend that you retain the bitmap associated with each changed block export at your backup location.
 
@@ -227,9 +198,7 @@ To take an incremental backup, complete the following steps:
 
 1.  Optional: On the host, delete the VDI snapshot, but retain the metadata:
 
-    ```python
-    session.xenapi.vdi.data_destroy(<snapshot_vdi_ref>)
-    ```
+        session.xenapi.vdi.data_destroy(<snapshot_vdi_ref>)
 
     This frees up space on the host or SR.
 
@@ -272,38 +241,34 @@ Use this coalesced VDI to restore or import backed up data.
 
     1.  Create a new VDI:
 
-        ```python
-        vdi_record = {
-             "SR": <sr>,
-             "virtual_size": <size>,
-             "type": "user",
-             "sharable": False,
-             "read_only": False,
-             "other_config": {},
-             "name_label": "<name_label>"
-         }
-         vdi_ref = session.xenapi.VDI.create(vdi_record)
-         vdi_uuid = session.xenapi.VDI.get_uuid(vdi_ref)
-        ```
+            vdi_record = {
+                 "SR": <sr>,
+                 "virtual_size": <size>,
+                 "type": "user",
+                 "sharable": False,
+                 "read_only": False,
+                 "other_config": {},
+                 "name_label": "<name_label>"
+            }
+            vdi_ref = session.xenapi.VDI.create(vdi_record)
+            vdi_uuid = session.xenapi.VDI.get_uuid(vdi_ref)
 
         Where &lt;*sr*&gt; is a reference to the SR that the original VDI was located on and &lt;*size*&gt; is the size of the original VDI.
 
     1.  To create a new VM that uses the VDI created in the previous step, import the VM metadata associated with the snapshot level you are using to restore the VDI:
 
-        ```python
-        vdi_string = "&vdi:%s=%s" % (<original_vdi_uuid>, <new_vdi_uuid>)
+            vdi_string = "&vdi:%s=%s" % (<original_vdi_uuid>, <new_vdi_uuid>)
 
-        task_ref = session.xenapi.task.create("import_vm", "Task to track vm import")
+            task_ref = session.xenapi.task.create("import_vm", "Task to track vm import")
 
-        url = ('https://%s/import_metadata?session_id=%s&task_id=%s%s'
-               % (host, session._session, task_ref, vdi_string))
+            url = ('https://%s/import_metadata?session_id=%s&task_id=%s%s'
+                   % (host, session._session, task_ref, vdi_string))
 
-        with open(<vm_import_path>, 'r') as filehandle:
-            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-            with requests.Session() as http_session:
-                request = http_session.put(url, filehandle, verify=False)
-                request.raise_for_status()
-        ```
+            with open(<vm_import_path>, 'r') as filehandle:
+                urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+                with requests.Session() as http_session:
+                    request = http_session.put(url, filehandle, verify=False)
+                    request.raise_for_status()
 
         Where &lt;*vm\_import\_path*&gt; is the location of the VM metadata.
 
@@ -320,15 +285,13 @@ Use this coalesced VDI to restore or import backed up data.
 
     In Python, you can use the following code:
 
-    ```python
-    session_id = session._session
-    url = ('https://%s/import_raw_vdi?session_id=%s&vdi=%s&format=%s'
-           % (<xs_host>, session_id, <vdi_uuid>, 'raw'))
-    with open(<import_path>, 'r') as filehandle:
-        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-        with requests.Session() as http_session:
-            request = http_session.put(url, filehandle, verify=False)
-            request.raise_for_status()
-    ```
+        session_id = session._session
+        url = ('https://%s/import_raw_vdi?session_id=%s&vdi=%s&format=%s'
+               % (<xs_host>, session_id, <vdi_uuid>, 'raw'))
+        with open(<import_path>, 'r') as filehandle:
+            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+            with requests.Session() as http_session:
+                request = http_session.put(url, filehandle, verify=False)
+                request.raise_for_status()
 
     Where &lt;*vdi\_uuid*&gt; is the UUID of the VDI you want to overwrite with the restored data from the coalesced VDI and &lt;*import\_path*&gt; is the location of the coalesced VDI.
