@@ -26,6 +26,8 @@ The following section lists advisories and constraints to consider when using ch
 
 -  XenServer supports a maximum of 16 concurrent NBD connections.
 
+-  Changed block tracking is not supported for VDIs stored on thin provisioned shared GFS2 block storage.
+
 ## Additional Resources
 
 The following resources provide additional information:
