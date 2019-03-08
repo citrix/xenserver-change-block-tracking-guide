@@ -3,8 +3,8 @@ site_description: Citrix XenServer Changed Block Tracking Guide
 theme_dir: citrix-sdk
 markdown_extensions:
   - admonition
-  - codehilite(guess_lang=false)
-  - toc(permalink=true)
+  - codehilite
+  - toc
   - footnotes
   - meta
 
