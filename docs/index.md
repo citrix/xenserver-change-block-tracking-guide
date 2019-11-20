@@ -1,5 +1,7 @@
 # Citrix XenServer Changed Block Tracking Guide
 
+The latest version of the Citrix Hypervisor (formerly XenServer) Changed Block Tracking Guide is available at <https://developer-docs.citrix.com/projects/citrix-hypervisor-changed-block-tracking-guide/en/latest/>.
+
 Changed block tracking provides a set of features and APIs that enable you to develop fast and space-efficient incremental backup solutions for XenServer.
 
 Changed block tracking is available only to customers with XenServer Enterprise Edition.
